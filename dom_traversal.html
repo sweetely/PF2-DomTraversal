@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive DOM Traversal</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff6fa;
+      color: #4d3554;
+      text-align: center;
+      padding: 20px;
+    }
+
+    header {
+      border-bottom: 2px solid #f7cde2;
+      padding-bottom: 15px;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      color: #d36e9f;
+    }
+
+    .profile {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Responsive tree container */
+  .tree-container {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.tree {
+  width: 60%;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+
+    .grandparent, .parent, .child {
+      border: 3px dashed #f2b6d1;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 12px;
+    }
+
+    .grandparent {
+      background-color: #ffe0ec;
+    }
+
+    .parent {
+      background-color: #f9d3e6;
+      margin-left: 30px;
+    }
+
+    .child {
+  width: 60%;               /* You can adjust between 40% to 70% */
+  margin: 10px auto;        /* This centers them horizontally */
+  padding: 10px;
+  background-color: #ffe6f0;
+  border: 2px dashed #f5a4c7;
+  border-radius: 10px;
+  text-align: center;
+}
+
+
+    .highlight {
+      outline: 3px solid #f48fb1;
+      background-color: #fff0f5 !important;
+    }
+
+    button {
+      background-color: #f8c2d1;
+      border: none;
+      color: #4d3554;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 6px rgba(244, 143, 177, 0.3);
+    }
+
+    button:hover {
+      background-color: #f48fb1;
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.95);
+      background-color: #ec8cae;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🌸 DOM Traversal & Manipulation</h1>
+    <div class="profile">
+      <strong>Complete Name:</strong> Elyssa Rose Delfino Vasquez<br>
+      <strong>Sex:</strong> Female<br>
+      <strong>Address:</strong> Zone 4, Camagong, San Jose, Camarines Sur<br>
+      <strong>Course, Year, and Section:</strong> BSIT 2A<br>
+      <strong>Name of School:</strong> Partido State University<br>
+      <strong>Semester and Academic Year:</strong> 2nd Sem, A.Y. 2024–2025<br>
+      <strong>Subject Code and Title:</strong> PF2 – Event-Driven Programming<br>
+      <strong>Name of Subject Instructor:</strong> [Instructor’s Name]
+    </div>
+  </header>
+
+  <div class="tree-container">
+    <div class="tree" id="tree">
+      <div class="grandparent">Grandparent
+        <div class="parent">Parent 1
+          <div class="child">Child 1</div>
+          <div class="child">Child 2</div>
+        </div>
+        <div class="parent">Parent 2
+          <div class="child">Child 1</div>
+          <div class="child">Child 2</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <button onclick="traverseUp()">⬆ Traverse Up</button>
+    <button onclick="traverseDown()">⬇ Traverse Down</button>
+    <button onclick="traverseNext()">➡ Next Sibling</button>
+    <button onclick="traversePrev()">⬅ Previous Sibling</button>
+    <button onclick="addChild()">➕ Add Child</button>
+    <button onclick="deleteNode()">❌ Delete Node</button>
+  </div>
+
+  <script>
+    let selectedNode = null;
+
+    document.querySelectorAll('.grandparent, .parent, .child').forEach(node => {
+      node.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (selectedNode) selectedNode.classList.remove('highlight');
+        selectedNode = this;
+        selectedNode.classList.add('highlight');
+      });
+    });
+
+    function traverseUp() {
+      if (!selectedNode || !selectedNode.parentElement || selectedNode.classList.contains('grandparent')) {
+        alert("No parent node available.");
+        return;
+      }
+      updateHighlight(selectedNode.parentElement);
+    }
+
+    function traverseDown() {
+      if (!selectedNode || !selectedNode.children.length) {
+        alert("No child node available.");
+        return;
+      }
+      updateHighlight(selectedNode.children[0]);
+    }
+
+    function traverseNext() {
+      let next = selectedNode?.nextElementSibling;
+      if (!next) {
+        alert("No next sibling.");
+        return;
+      }
+      updateHighlight(next);
+    }
+
+    function traversePrev() {
+      let prev = selectedNode?.previousElementSibling;
+      if (!prev) {
+        alert("No previous sibling.");
+        return;
+      }
+      updateHighlight(prev);
+    }
+
+    function addChild() {
+      if (!selectedNode) {
+        alert("Please select a node first.");
+        return;
+      }
+
+      if (selectedNode.classList.contains('grandparent')) {
+        let newParent = document.createElement('div');
+        newParent.className = 'parent';
+        newParent.textContent = 'New Parent';
+        
+        let child1 = document.createElement('div');
+        child1.className = 'child';
+        child1.textContent = 'Child 1';
+        
+        let child2 = document.createElement('div');
+        child2.className = 'child';
+        child2.textContent = 'Child 2';
+
+        newParent.appendChild(child1);
+        newParent.appendChild(child2);
+        selectedNode.appendChild(newParent);
+        addClickListeners(newParent);
+      } else if (selectedNode.classList.contains('parent')) {
+        let newChild = document.createElement('div');
+        newChild.className = 'child';
+        newChild.textContent = 'New Child';
+        selectedNode.appendChild(newChild);
+        addClickListeners(newChild);
+      } else {
+        alert("Cannot add child to a child node.");
+      }
+    }
+
+    function deleteNode() {
+      if (!selectedNode) {
+        alert("Please select a node first.");
+        return;
+      }
+
+      if (selectedNode.classList.contains('grandparent')) {
+        alert("Cannot delete the grandparent node.");
+        return;
+      }
+
+      const parent = selectedNode.parentElement;
+      parent.removeChild(selectedNode);
+      selectedNode = null;
+    }
+
+    function updateHighlight(newNode) {
+      if (selectedNode) selectedNode.classList.remove('highlight');
+      selectedNode = newNode;
+      selectedNode.classList.add('highlight');
+    }
+
+    function addClickListeners(element) {
+      element.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (selectedNode) selectedNode.classList.remove('highlight');
+        selectedNode = this;
+        selectedNode.classList.add('highlight');
+      });
+
+      if (element.children.length) {
+        Array.from(element.children).forEach(child => addClickListeners(child));
+      }
+    }
+  </script>
+
+</body>
+</html>
+
